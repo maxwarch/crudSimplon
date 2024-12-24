@@ -1,0 +1,10 @@
+[
+    {
+        "name": "Product",
+        "description": "Get product by **ProductID**"
+    },
+    {
+        "name": "Products",
+        "description": "List the products with pagination"
+    }
+]

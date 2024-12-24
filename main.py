@@ -1,47 +1,47 @@
 # from json import dumps
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from json import loads
+import json
 import os
 from fastapi import FastAPI
+import pyodbc
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-import pymongo
-from pymongo.errors import ServerSelectionTimeoutError
-import urllib
+import sqlalchemy
 from app.routes import product
-    
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    username = urllib.parse.quote_plus(os.getenv('DB_USER'))
-    password = urllib.parse.quote_plus(os.getenv('DB_PWD'))
-    db = os.getenv('DB')
-    uri = os.getenv('DB_URI')
 
-    uri = f"{uri % (username, password, db)}"
-    app.client = AsyncIOMotorClient(uri)
-    app.db = app.client.get_database(os.getenv('DB'))
-    
-    try:
-        ping_response = await app.db.command("ping")
-        if int(ping_response["ok"]) != 1:
-            raise Exception("Problem connecting to database cluster.")
-        else:
-            print("Connected to database cluster.")
+DB_SERVER = os.getenv('DB_SERVER')
+DB_NAME = os.getenv('DB_NAME')
+DB_USER = os.getenv('DB_USER')
+DB_PASSWORD = os.getenv('DB_PASSWORD')
 
-    except ServerSelectionTimeoutError as e:
-        print(e)
-    
-    yield
+CONN_STR = f'Driver={{ODBC Driver 18 for SQL Server}};Server=tcp:{DB_SERVER}.database.windows.net,1433;Database={DB_NAME};Uid={DB_USER};Pwd={DB_PASSWORD};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;'
 
-    app.client.close()
-    
-app = FastAPI(lifespan=lifespan)
+
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     print(pyodbc.drivers())
+#     app.conn = pyodbc.connect(CONN_STR)
+#     app.conn.add_output_converter(-151, lambda x: str(x))
+
+#     yield
+
+#     app.conn.close()
+
+# load documentation
+tags_metadata = []
+with open('./doc.json') as fd:
+    tags_metadata = json.load(fd)
+# end load documentation
+
+app = FastAPI(openapi_tags=tags_metadata)  # , lifespan=lifespan)
+app.conn_str = f"mssql+pyodbc:///?odbc_connect={sqlalchemy.engine.url.quote_plus(CONN_STR)}"
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Ou une liste d'origines spécifiques
+    allow_origins=["*"],  # Ou une liste d'origines spécifiques
     allow_credentials=True,
-    allow_methods=["*"], # Ou une liste de méthodes spécifiques
-    allow_headers=["*"], # Ou une liste d'en-têtes spécifiques
+    allow_methods=["*"],  # Ou une liste de méthodes spécifiques
+    allow_headers=["*"],  # Ou une liste d'en-têtes spécifiques
 )
 
 app.include_router(product.router)
@@ -49,4 +49,4 @@ app.include_router(product.router)
 
 @app.get("/")
 async def root():
-    return {"message": f"Hello World {os.getenv('DB')}"} 
+    return {"message": f"Hello World {os.getenv('DB')}"}

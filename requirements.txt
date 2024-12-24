@@ -1,6 +1,5 @@
 fastapi
 uvicorn
 gunicorn
-requests
-pymongo
-motor
+pyodbc
+sqlmodel

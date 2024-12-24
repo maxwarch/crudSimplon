@@ -1,0 +1,15 @@
+name: server-project
+services:
+  cruddev:
+    container_name: cruddev
+    build:
+      context: .
+      target: dev
+    ports:
+      - "8000:8000"
+    command: uvicorn main:app --reload --workers 4 --host 0.0.0.0 --port 8000
+    volumes:
+      - .:/app
+    restart: always
+    env_file: .env
+    tty: true
