@@ -1,7 +1,7 @@
 [
     {
         "name": "Product",
-        "description": "Get product by **ProductID**"
+        "description": "Get, create or update one product by **ProductID**"
     },
     {
         "name": "Products",

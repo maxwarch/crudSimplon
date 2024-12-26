@@ -1,4 +1,7 @@
-MONGO_URI="mongodb://%s:%s@0.0.0.0:<port>"
-DB=
-DB_USER=
-DB_PWD=
+DB_SERVER="adventureworks-server-hdf"
+DB_NAME="adventureworks"
+DB_USER=""
+DB_PASSWORD=""
+
+API_USERNAME=""
+API_PASSWORD=""

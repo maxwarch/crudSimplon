@@ -1,10 +1,6 @@
-# from json import dumps
-from json import loads
 import json
 import os
 from fastapi import FastAPI
-import pyodbc
-from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 import sqlalchemy
 from app.routes import product
@@ -17,23 +13,13 @@ DB_PASSWORD = os.getenv('DB_PASSWORD')
 CONN_STR = f'Driver={{ODBC Driver 18 for SQL Server}};Server=tcp:{DB_SERVER}.database.windows.net,1433;Database={DB_NAME};Uid={DB_USER};Pwd={DB_PASSWORD};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;'
 
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     print(pyodbc.drivers())
-#     app.conn = pyodbc.connect(CONN_STR)
-#     app.conn.add_output_converter(-151, lambda x: str(x))
-
-#     yield
-
-#     app.conn.close()
-
 # load documentation
 tags_metadata = []
 with open('./doc.json') as fd:
     tags_metadata = json.load(fd)
 # end load documentation
 
-app = FastAPI(openapi_tags=tags_metadata)  # , lifespan=lifespan)
+app = FastAPI(openapi_tags=tags_metadata)
 app.conn_str = f"mssql+pyodbc:///?odbc_connect={sqlalchemy.engine.url.quote_plus(CONN_STR)}"
 
 app.add_middleware(
