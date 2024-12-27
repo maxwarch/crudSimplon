@@ -82,9 +82,8 @@ def get_product(req: Request, product_id: int):
 
         return product_db
 
+
 # UPDATE
-
-
 @router.patch("/product", tags=["Product"], response_model=Product, dependencies=[Depends(get_current_username)])
 def patch_product(req: Request,
                   product_id: int,

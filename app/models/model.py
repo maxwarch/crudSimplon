@@ -9,23 +9,20 @@ from sqlmodel import Field, Relationship, SQLModel, INT, BOOLEAN, SMALLINT, NVAR
 #     from .productModel_model import ProductModel
 
 
-class ProductModelBase(SQLModel, table=True):
+class ProductModel(SQLModel, table=True):
     __tablename__ = 'ProductModel'
     __table_args__ = {"schema": "Production"}
 
+    ProductModelID: int | None = Field(default=None, primary_key=True)
     Name: str = Field(nullable=False, index=True)
     CatalogDescription: str | None = Field(default=None)
     Instructions: str | None = Field(default=None)
     rowguid: str = Field(default_factory=lambda: str(uuid.uuid4()), nullable=False, unique=True)
     ModifiedDate: Optional[datetime.datetime] = Field(default_factory=datetime.datetime.utcnow, sa_type=DATETIME, nullable=False)
+    products: List["Product"] = Relationship(back_populates="ProductModelInfo")
 
 
-class ProductModel(ProductModelBase, table=True):
-    ProductModelID: int | None = Field(default=None, primary_key=True)
-    products: List["Product"] = Relationship(back_populates="ProductModelInfo", sa_relationship=ForeignKey("Production.Product.ProductModelID"))
-
-
-class ProductBase(SQLModel, table=True):
+class ProductBase(SQLModel):
     __tablename__ = "Product"
     __table_args__ = {"schema": "Production"}
 
@@ -50,9 +47,6 @@ class ProductBase(SQLModel, table=True):
     Style: str | None = Field(default=None, sa_type=NCHAR(2))
     ProductSubcategoryID: int | None = Field(default=None, sa_type=INT)
 
-    ProductModelID: int | None = Field(default=None, foreign_key="Production.ProductModel.ProductModelID")
-    ProductModelInfo: Optional["ProductModel"] = Relationship(back_populates="products", sa_relationship=ForeignKey("Production.ProductModel.ProductModelID"))
-
     SellEndDate: datetime.datetime | None = Field(default=None, sa_type=DATETIME)
     DiscontinuedDate: datetime.datetime | None = Field(default=None, sa_type=DATETIME)
     rowguid: str = Field(default_factory=lambda: str(uuid.uuid4()), sa_type=NVARCHAR(36), nullable=False)
@@ -61,6 +55,8 @@ class ProductBase(SQLModel, table=True):
 
 class Product(ProductBase, table=True):
     ProductID: int | None = Field(default=None, primary_key=True)
+    ProductModelID: int | None = Field(default=None, foreign_key="Production.ProductModel.ProductModelID")
+    ProductModelInfo: Optional[ProductModel] = Relationship(back_populates="products")
 
 
 class ProductCreate(ProductBase):
