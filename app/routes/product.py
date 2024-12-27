@@ -75,6 +75,9 @@ def get_products(req: Request, page: Union[int, None] = 1, limit: Union[int, Non
 @router.get("/product/{product_id}", tags=["Product"])
 def get_product(req: Request, product_id: int):
     with Session(get_engine(req)) as session:
+        query = select(Product).where(Product.ProductID == product_id)
+        print(query)
+
         product_db = session.get(Product, product_id)
 
         if not product_db:
